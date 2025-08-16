@@ -79,7 +79,7 @@ ORDER BY customer_id ASC
 * Use **JOIN** to merge `sales` and `menu` tables, where `customer_id` comes from `sales` table, and `price` comes from `menu` table.
 * Use **SUM** to calculate `total_amount`.
 * Aggregate `customer_id` results using **GROUP BY**.
-* Sort  `customer_id` alphabetically with **ORDER BY ASC**
+* Sort  `customer_id` alphabetically with **ORDER BY ASC**.
   
 #### Result:
 customer_id | total_amount
@@ -102,10 +102,10 @@ FROM sales
 GROUP BY customer_id
 ````
 #### Steps:
-* Use **COUNT(DISTINCT `order_date`)** to count unique days in which customers placed orders
+* Use **COUNT(DISTINCT `order_date`)** to count unique days in which customers placed orders.
 * Aggregate `customer_id` results using **GROUP BY**.
 
-#### Results:
+#### Result:
 customer_id | visited_days
 -- | --
 A	| 4
@@ -131,22 +131,48 @@ ORDER BY s.customer_id ASC
 ````
 
 #### Steps:
-* Use **MIN(`s.order_date`)** to use first date
-* Use **LEFT JOIN** to merge tables `sales` and `menu` on `product_id` columns
+* Use **MIN(`s.order_date`)** to use first date.
+* Use **LEFT JOIN** to merge tables `sales` and `menu` on `product_id` columns.
 * Aggregate `customer_id` results using **GROUP BY**.
 
-#### Results:
+#### Result:
 customer_id | order_date | product_name
 -- | -- | --
 A |	2021-01-01 | curry
 B	| 2021-01-01 | curry
 C |	2021-01-01 | ramen
 
-* Customer **A** as first purchased curry
-* Customer **B** as first purchased curry
-* Customer **C** as first purchased ramen
+* Customer **A** as first purchased curry.
+* Customer **B** as first purchased curry.
+* Customer **C** as first purchased ramen.
 
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+```` sql
+SELECT 
+    m.product_name ,
+    COUNT(s.product_id) AS number_of_orders
+FROM menu AS m
+INNER JOIN sales AS s
+    ON m.product_id = s.product_id
+GROUP BY m.product_name
+ORDER BY number_of_orders DESC
+LIMIT 1
+````
+#### Steps:
+* Use **COUNT** to calculate numer of orders.
+* Use **INNER JOIN** to merge tables `sales` and `menu` on `product_id` column.
+* Aggregate `product_name` results using **GROUP BY**.
+* Sort  `number_of_orders` decreasing with **ORDER BY DESC**.
+* Return only one result with **LIMIT 1**.
+
+#### Result:
+product_name | number_of_orders
+-- | --
+ramen | 8
+
+* The most purchased item on the menu is **ramen** and it was purchased **8 times**.
+
+
 ### 5. Which item was the most popular for each customer?
 ### 6. Which item was purchased first by the customer after they became a member?
 ### 7. Which item was purchased just before the customer became a member?
