@@ -302,9 +302,38 @@ B | sushi
 * Customer **A** purchased **curry** and **sushi** just before becoming a member.
 * Customer **B** purchased **sushi** just before becoming a member.
 
-
-
 ### 8. What is the total items and amount spent for each member before they became a member?
+
+```` sql
+SELECT
+    s.customer_id,
+    COUNT(*) AS total_items,
+    SUM(men.price) AS amount
+FROM sales AS s
+LEFT JOIN members AS mem
+    ON s.customer_id = mem.customer_id
+LEFT JOIN menu AS men
+    ON s.product_id = men.product_id
+WHERE s.order_date < mem.join_date
+GROUP BY s.customer_id
+ORDER BY s.customer_id ASC
+````
+
+#### Steps:
+* **COUNT** and **SUM** rows
+* Filter orders where `order_date` is less than `join_date`
+* Aggregate `customer_id` using **GROUP BY**
+
+#### Result:
+customer_id | total_items | amount
+-- | -- | --
+A | 2 | 25
+B | 3 | 40
+
+* Customer **A** before becoming a member ordered **2** items and spent **25**.
+* Customer **B** before becoming a member ordered **3** items and spent **40**.
+
+
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 
