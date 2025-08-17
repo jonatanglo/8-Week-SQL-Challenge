@@ -121,17 +121,17 @@ C	| 2
 ```` sql
 With ranking_orders AS (
     SELECT
-    DISTINCT s.customer_id,
-    m.product_name,
-    RANK() OVER(PARTITION BY s.customer_id ORDER BY s.order_date) AS ranking
+        DISTINCT s.customer_id,
+        m.product_name,
+        RANK() OVER(PARTITION BY s.customer_id ORDER BY s.order_date) AS ranking
     FROM sales AS s
     LEFT JOIN menu AS m
         ON s.product_id = m.product_id
 )
 
 SELECT 
-customer_id,
-product_name
+    customer_id,
+    product_name
 FROM ranking_orders
 WHERE ranking = 1
 ORDER BY customer_id ASC
