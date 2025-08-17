@@ -1,7 +1,7 @@
 I decided to practise my SQL skills so I joined to Danny's Ma #8WeekSQLChallenge where I can deal with real business cases and solve them. I post my journey at my GitHub portfolio. You can find Danny's materials [here](https://8weeksqlchallenge.com/).
 
 # <p align="center"> Case Study #1 - Danny's Diner </p>
-<p align="center"><img  height="500" alt="8weeksqlchallenge - taste of success" src="https://github.com/user-attachments/assets/6e85fef3-2a14-4ae8-a3ec-4de1dc8c72db" /></p>
+<p align="center"><img  height="300" alt="8weeksqlchallenge - taste of success" src="https://github.com/user-attachments/assets/6e85fef3-2a14-4ae8-a3ec-4de1dc8c72db" /></p>
 
 ---
 ## Table of Contest:
@@ -138,12 +138,12 @@ ORDER BY customer_id ASC
 ````
 
 #### Steps:
-* Use **With AS** to create later reference to table
-* Use **DISTINCT** to select only unique rows
-* Rank order dates with **RANK()** and aggregate by `customer_id` using **OVER(PARTITION BY `customer_id`)**
-* Merge tables `sales` and `menu` with **LEFT JOIN** 
-* Use reference to table `ranking_orders` with **FROM `ranking_orders`**
-* Filter only first orders with **WHERE `ranking` = 1**
+* Use **With AS** to create temporary table.
+* Use **DISTINCT** to select only unique rows.
+* Rank order dates with **RANK()** and aggregate by `customer_id` using **OVER(PARTITION BY `customer_id`)**.
+* Merge tables `sales` and `menu` with **LEFT JOIN**.
+* Use reference to table `ranking_orders` with **FROM `ranking_orders`**.
+* Filter only first orders with **WHERE `ranking` = 1**.
 
 #### Result:
 customer_id | product_name
@@ -158,6 +158,7 @@ C | ramen
 * Customer **C** as first purchased ramen.
 
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+
 ```` sql
 SELECT 
     m.product_name ,
@@ -185,6 +186,46 @@ ramen | 8
 
 
 ### 5. Which item was the most popular for each customer?
+
+```` sql
+With ranking_orders AS (
+SELECT
+    s.customer_id,
+    m.product_name,
+    COUNT(*) AS orders,
+    RANK() OVER(PARTITION BY s.customer_id ORDER BY COUNT(*) DESC) AS ranking
+FROM sales AS s
+LEFT JOIN menu AS m
+    ON s.product_id = m.product_id
+GROUP BY s.customer_id, m.product_name
+)
+
+SELECT
+    customer_id,
+    product_name,
+    orders
+FROM ranking_orders
+WHERE ranking = 1
+````
+
+#### Steps:
+* Use **With AS** to create temporary table with ranking purchased items for each customer.
+* Filter the most purchased items with **WHERE `ranking` = 1**
+
+#### Result:
+customer_id | product_name | orders
+-- | -- | --
+A | ramen | 3
+B | sushi | 2
+B | ramen | 2
+B | curry | 2
+C | ramen | 3
+
+* For customer **A** the most popular item was **ramen**. 
+* For customer **B** the most popular items were **sushi**, **ramen** and **curry**. 
+* For customer **C** the most popular item was **ramen**. 
+
+
 ### 6. Which item was purchased first by the customer after they became a member?
 ### 7. Which item was purchased just before the customer became a member?
 ### 8. What is the total items and amount spent for each member before they became a member?
