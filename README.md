@@ -119,30 +119,41 @@ C	| 2
 ### 3. What was the first item from the menu purchased by each customer?
 
 ```` sql
-SELECT
-s.customer_id,
-MIN(s.order_date) AS order_date,
-MIN(m.product_name) AS product_name
-FROM sales AS s
-LEFT JOIN menu AS m
-    ON s.product_id = m.product_id
-GROUP BY s.customer_id
-ORDER BY s.customer_id ASC
+With ranking_orders AS (
+    SELECT
+    DISTINCT s.customer_id,
+    m.product_name,
+    RANK() OVER(PARTITION BY s.customer_id ORDER BY s.order_date) AS ranking
+    FROM sales AS s
+    LEFT JOIN menu AS m
+        ON s.product_id = m.product_id
+)
+
+SELECT 
+customer_id,
+product_name
+FROM ranking_orders
+WHERE ranking = 1
+ORDER BY customer_id ASC
 ````
 
 #### Steps:
-* Use **MIN(`s.order_date`)** to use first date.
-* Use **LEFT JOIN** to merge tables `sales` and `menu` on `product_id` columns.
-* Aggregate `customer_id` results using **GROUP BY**.
+* Use **With AS** to create later reference to table
+* Use **DISTINCT** to select only unique rows
+* Rank order dates with **RANK()** and aggregate by `customer_id` using **OVER(PARTITION BY `customer_id`)**
+* Merge tables `sales` and `menu` with **LEFT JOIN** 
+* Use reference to table `ranking_orders` with **FROM `ranking_orders`**
+* Filter only first orders with **WHERE `ranking` = 1**
 
 #### Result:
-customer_id | order_date | product_name
--- | -- | --
-A |	2021-01-01 | curry
-B	| 2021-01-01 | curry
-C |	2021-01-01 | ramen
+customer_id | product_name
+-- | --
+A | sushi
+A | curry
+B | curry
+C | ramen
 
-* Customer **A** as first purchased curry.
+* Customer **A** as first purchased sushi and curry.
 * Customer **B** as first purchased curry.
 * Customer **C** as first purchased ramen.
 
