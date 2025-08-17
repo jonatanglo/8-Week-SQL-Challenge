@@ -251,7 +251,7 @@ WHERE ranking = 1
 
 #### Steps:
 * Use **With AS** to create temporary table with ranking items for each customer.
-* Fiter `order_dates` greater or equal than `join_date` (join date of membership) for orders placed beeing a member.
+* Fiter `order_date` greater or equal than `join_date` (join date of membership) for orders placed beeing a member.
 * Filter first order with **WHERE `ranking` = 1**.
 
 #### Result:
@@ -264,6 +264,46 @@ B | sushi
 * Customer **B** purchased **sushi** firt after he became a member.
 
 ### 7. Which item was purchased just before the customer became a member?
+
+```` sql
+WITH ranking_items AS (
+    SELECT
+        s.customer_id,
+        s.product_id,
+        RANK() OVER(PARTITION BY s.customer_id ORDER BY order_date DESC) AS ranking
+    FROM sales AS s
+    LEFT JOIN members AS mem
+        ON s.customer_id = mem.customer_id
+    WHERE s.order_date < mem.join_date    
+)
+
+SELECT
+    customer_id,
+    men.product_name
+FROM ranking_items AS ri
+LEFT JOIN menu AS men
+    ON ri.product_id = men.product_id
+WHERE ranking = 1
+````
+
+#### Steps:
+* Use **With AS** to create temporary table with ranking items for each customer.
+* Fiter `order_date` less than `join_date` (join date of membership) for orders placed before beeing a member.
+* Sort `order_date` descending for lastest order befor beeing a member.
+* Filter first order with **WHERE `ranking` = 1**.
+
+#### Result:
+customer_id | product_name
+-- | --
+A | curry
+A | sushi
+B | sushi
+
+* Customer **A** purchased **curry** and **sushi** just before becoming a member.
+* Customer **B** purchased **sushi** just before becoming a member.
+
+
+
 ### 8. What is the total items and amount spent for each member before they became a member?
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
