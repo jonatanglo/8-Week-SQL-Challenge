@@ -210,7 +210,7 @@ WHERE ranking = 1
 
 #### Steps:
 * Use **With AS** to create temporary table with ranking purchased items for each customer.
-* Filter the most purchased items with **WHERE `ranking` = 1**
+* Filter the most purchased items with **WHERE `ranking` = 1**.
 
 #### Result:
 customer_id | product_name | orders
@@ -227,6 +227,42 @@ C | ramen | 3
 
 
 ### 6. Which item was purchased first by the customer after they became a member?
+
+```` sql
+WITH ranking_items AS (
+    SELECT
+        s.customer_id,
+        men.product_name,
+        RANK() OVER(PARTITION BY s.customer_id ORDER BY s.order_date ASC) AS ranking
+    FROM sales AS s
+    LEFT JOIN menu AS men
+        ON s.product_id = men.product_id
+    LEFT JOIN members AS mem
+        ON s.customer_id = mem.customer_id
+    WHERE order_date >= join_date
+)
+
+SELECT 
+    customer_id,
+    product_name
+FROM ranking_items
+WHERE ranking = 1
+````
+
+#### Steps:
+* Use **With AS** to create temporary table with ranking items for each customer.
+* Fiter `order_dates` greater or equal than `join_date` (join date of membership) for orders placed beeing a member.
+* Filter first order with **WHERE `ranking` = 1**.
+
+#### Result:
+customer_id | product_name
+-- | --
+A | curry
+B | sushi
+
+* Customer **A** purchased **curry** firt after he became a member.
+* Customer **B** purchased **sushi** firt after he became a member.
+
 ### 7. Which item was purchased just before the customer became a member?
 ### 8. What is the total items and amount spent for each member before they became a member?
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
