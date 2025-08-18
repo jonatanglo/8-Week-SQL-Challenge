@@ -340,8 +340,8 @@ B | 3 | 40
 SELECT
     s.customer_id,
     SUM (CASE
-        WHEN m.product_name = 'sushi' THEN m.price * 10 * 2
-        ELSE m.price * 10
+        WHEN m.product_name = 'sushi' THEN m.price*10*2
+        ELSE m.price*10
     END ) AS score 
 FROM sales AS s
 LEFT JOIN menu AS m
@@ -350,6 +350,20 @@ GROUP BY s.customer_id
 ORDER BY s.customer_id
 ````
 
+#### Steps:
+* With **CASE** set conditional to 'sushi' for `price` * 10 * 2 and for all another `price` * 10.
+* Use **GROUP BY** to agregate table with `customer_id`.
+
+#### Result:
+cusotmer_id | score
+-- | --
+A | 860
+B | 940
+C | 360
+
+* Customer **A** score **860 points**.
+* Cusotmer **B** score **940 points**.
+* Customer **B** score **360 points**.
 
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 
