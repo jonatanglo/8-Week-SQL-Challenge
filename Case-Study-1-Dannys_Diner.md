@@ -367,3 +367,41 @@ C | 360
 
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 
+```` sql
+With points_scored AS (
+    SELECT
+        s.customer_id,
+        SUM (CASE
+            WHEN s.order_date >= mem.join_date AND MONTH(s.order_date) = 1 THEN men.price * 10 * 2
+            ELSE men.price * 10 
+            END) AS score
+    FROM sales AS s
+    LEFT JOIN menu AS men
+        ON s.product_id = men.product_id
+    LEFT JOIN members AS mem
+        ON s.customer_id = mem.customer_id
+    WHERE MONTH(order_date) = 1
+    GROUP BY s.customer_id
+)
+
+SELECT
+    *
+FROM points_scored
+WHERE customer_id IN('A', 'B')
+ORDER BY customer_id
+````
+
+### Steps:
+* In window function **SUM** points **WHEN** `order_date` is after `join_date` and `order_date` is January **THEN** double points.
+* Use **LEFT JOIN** to merge tables `sales` and `menu` on `product_id` column and `sales` and `members on `customer_id`.
+* With **WHERE MONTH(order_date) = 1** filter orders placed only in January
+* Filter only Customer A and Customer B
+
+### Result:
+customer_id | score
+-- | --
+A | 1020
+B | 440
+
+* Customer **A** scored **1020** points.
+* Customer **B** scored **440** points.
