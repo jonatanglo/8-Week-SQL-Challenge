@@ -392,7 +392,7 @@ ORDER BY customer_id
 ````
 
 ### Steps:
-* In window function **SUM** points **WHEN** `order_date` is after `join_date` and `order_date` is January **THEN** double points.
+* In temporary table `points_scored` **SELECT** `customer_id` and **SUM** points **WHEN** `order_date` is after `join_date` and `order_date` is January **THEN** double points.
 * Use **LEFT JOIN** to merge tables `sales` and `menu` on `product_id` column and `sales` and `members on `customer_id`.
 * With **WHERE MONTH(order_date) = 1** filter orders placed only in January
 * Filter only Customer A and Customer B
