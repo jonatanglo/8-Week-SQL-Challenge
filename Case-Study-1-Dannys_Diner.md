@@ -391,13 +391,13 @@ WHERE customer_id IN('A', 'B')
 ORDER BY customer_id
 ````
 
-### Steps:
+#### Steps:
 * In temporary table `points_scored` **SELECT** `customer_id` and **SUM** points **WHEN** `order_date` is after `join_date` and `order_date` is January **THEN** double points.
 * Use **LEFT JOIN** to merge tables `sales` and `menu` on `product_id` column and `sales` and `members on `customer_id`.
 * With **WHERE MONTH(order_date) = 1** filter orders placed only in January
 * Filter only Customer A and Customer B
 
-### Result:
+#### Result:
 customer_id | score
 -- | --
 A | 1020
@@ -405,3 +405,54 @@ B | 440
 
 * Customer **A** scored **1020** points.
 * Customer **B** scored **440** points.
+
+### Bonus Questions. Danny requires further information about the ranking of customer products, but he purposely does not need the ranking for non-member purchases so he expects null ranking values for the records when customers are not yet part of the loyalty program.
+
+```` sql
+With ranking_order AS (
+SELECT 
+sales.customer_id,
+sales.order_date,
+menu.product_name,
+menu.price,
+CASE
+    WHEN order_date >= join_date THEN 'Y'
+    ELSE 'N'
+END AS member
+FROM sales
+LEFT JOIN members
+    ON sales.customer_id = members.customer_id
+LEFT JOIN menu
+    ON sales.product_id = menu.product_id
+)
+
+SELECT
+*,
+CASE 
+    WHEN member = 'N' THEN null
+    ELSE RANK() OVER(PARTITION BY customer_id, member ORDER BY order_date)
+END AS ranking
+FROM ranking_order
+````
+
+#### Result:
+customer_id | order_date | product_name | price | member | ranking
+-- | -- | -- | -- | -- | --
+A | 2021-01-01 | sushi | 10 | N | null	
+A | 2021-01-01 | curry | 15 | N | null
+A | 2021-01-07 | curry | 15 | Y | 1
+A | 2021-01-10 | ramen | 12 | Y | 2
+A | 2021-01-11 | ramen | 12	| Y | 3
+A | 2021-01-11 | ramen | 12 | Y | 3
+B | 2021-01-01 | curry | 15 | N | null
+B | 2021-01-02 | curry | 15 | N | null	
+B | 2021-01-04 | sushi | 10 | N | null
+B | 2021-01-11 | sushi | 10 | Y | 1
+B | 2021-01-16 | ramen | 12 | Y | 2
+B | 2021-02-01 | ramen | 12 | Y | 3
+C | 2021-01-01 | ramen | 12 | N | null
+C | 2021-01-01 | ramen | 12 | N | null
+C | 2021-01-07 | ramen | 12 | N | null
+
+
+
