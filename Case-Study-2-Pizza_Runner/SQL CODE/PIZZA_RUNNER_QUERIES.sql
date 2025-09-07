@@ -86,3 +86,33 @@ LEFT JOIN AT_LEAST_1_CHANGE
 
 group by CUSTOMER_ORDERS.customer_id;
 
+--8.How many pizzas were delivered that had both exclusions and extras?
+SELECT * FROM CUSTOMER_ORDERS;
+
+SELECT 
+    COUNT(*)
+FROM CUSTOMER_ORDERS
+LEFT JOIN RUNNER_ORDERS
+    ON CUSTOMER_ORDERS.ORDER_ID = RUNNER_ORDERS.ORDER_ID
+WHERE EXCLUSIONS IS NOT NULL AND EXTRAS IS NOT NULL AND CANCELLATION IS NULL;
+
+
+    
+--9.What was the total volume of pizzas ordered for each hour of the day?
+SELECT 
+    DISTINCT HOUR(ORDER_TIME) AS hour, 
+    COUNT(*) AS numer_of_pizzas
+FROM CUSTOMER_ORDERS
+GROUP BY hour
+ORDER BY hour;
+
+--10.What was the volume of orders for each day of the week?
+SELECT * FROM CUSTOMER_ORDERS;
+
+SELECT
+--    WEEKDAY(CAST (ORDER_TIME AS DATE)) AS weekday,
+    DAYOFWEEK(ORDER_TIME) AS weekday,
+    COUNT(*) AS orders
+FROM CUSTOMER_ORDERS
+GROUP BY weekday
+ORDER BY weekday;
